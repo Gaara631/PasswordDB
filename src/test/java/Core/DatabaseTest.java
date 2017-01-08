@@ -1,12 +1,10 @@
-package App;
+package Core;
 
+import Exceptions.NullPasswordException;
+import Exceptions.WrongPasswordException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.Timeout;
-
-import javax.security.auth.login.LoginException;
-import javax.xml.crypto.Data;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
@@ -52,12 +50,12 @@ public class DatabaseTest {
        System.setOut(new PrintStream(outContent));
         try {
             testDB = new Database("ForTest","Password",true);
-        } catch (LoginException e) {
+        } catch (WrongPasswordException | NullPasswordException e) {
             e.printStackTrace();
         }
 
-        testDB.addNewEntry("NewEntry1","MyLogin","MyPassword");
-        testDB.addNewEntry("NewEntry2","MyLogin","MyPassword");
+        testDB.addNewEntry("NewEntry1","MyLogin","MyPassword","Descript","Group1");
+        testDB.addNewEntry("NewEntry2","MyLogin","MyPassword","Descript","Group1");
         testDB.readEntry("NewEntry1");
 
         assertNotEquals("Entry not found\n",outContent.toString());
@@ -70,12 +68,12 @@ public class DatabaseTest {
         System.setOut(new PrintStream(outContent));
         try {
             testDB = new Database("ForTest","Password",false);
-        } catch (LoginException e) {
+        } catch (WrongPasswordException | NullPasswordException e) {
             e.printStackTrace();
             exit(1);
         }
 
-        testDB.addNewEntry("SuperEntry","MyLogin","MyPassword");
+        testDB.addNewEntry("SuperEntry","MyLogin","MyPassword","Descript","Group1");
         testDB.readEntry("SuperEntry");
 
 
@@ -88,13 +86,13 @@ public class DatabaseTest {
 
         try {
             testDB = new Database("ForTest","Password",false);
-        } catch (LoginException e) {
+        } catch (WrongPasswordException | NullPasswordException e) {
             e.printStackTrace();
         }
 
-        testDB.addNewEntry("NewEntry1","MyLogin","MyPassword");
-        testDB.addNewEntry("NewEntry2","MyLogin","MyPassword");
-        testDB.addNewEntry("NewEntry3","MyLogin","MyPassword");
+        testDB.addNewEntry("NewEntry1","MyLogin","MyPassword","Descript","Group1");
+        testDB.addNewEntry("NewEntry2","MyLogin","MyPassword","Descript","Group1");
+        testDB.addNewEntry("NewEntry3","MyLogin","MyPassword","Descript","Group1");
 
         testDB.readAll();
         assertNotEquals("Total entries:0",outContent.toString());

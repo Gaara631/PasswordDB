@@ -1,13 +1,14 @@
-package App;
+package Core;
 
 import javax.crypto.BadPaddingException;
-import javax.security.auth.login.LoginException;
 import java.io.*;
 import java.util.*;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+import Exceptions.NullPasswordException;
+import Exceptions.WrongPasswordException;
 import org.apache.commons.codec.binary.Base64;
 
 import static java.lang.System.arraycopy;
@@ -31,10 +32,9 @@ public class Database {
     private File fileBase;
     private byte[] fileCache;
 
-    public Database(String url,String password, boolean createFile) throws LoginException {
+    public Database(String url,String password, boolean createFile) throws NullPasswordException, WrongPasswordException {
         if (password.length() <= 0) {
-            System.out.println("Password is null");
-            exit(1);
+            throw new NullPasswordException("Password is null");
         }
         if(password.length()<16)
         {
@@ -80,16 +80,11 @@ public class Database {
 
             if(!Arrays.equals(decryptedSRC,crc))
             {
-                throw new LoginException("Invalid password");
+                throw new WrongPasswordException("Invalid password");
             }
             readDataLength();
         }//Create File
         else {
-            if(fileBase.exists())
-            {
-                //TODO Ask before delete
-                fileBase.delete();
-            }
             try {
                 fileBase.createNewFile();
             } catch (IOException e) {
@@ -206,10 +201,10 @@ public class Database {
 
     }
 
-    public void addNewEntry(String EntryName, String login, String password) {
+    public void addNewEntry(String EntryName, String login, String password,String description,String group) {
 
 
-        byte[] data = new Entry(EntryName,login,password).serEntry();
+        byte[] data = new Entry(EntryName,login,password,description,group).serEntry();
 
         byte[] encryptedData = Database.encrypt(key,vector,data);
 
@@ -281,7 +276,7 @@ public class Database {
     }
 
 
-    public void readEntry(String entryName) {
+    public Entry readEntry(String entryName) {
         String allEncryptedEntries = "";
         boolean read = false;
         int j = 0;
@@ -302,22 +297,22 @@ public class Database {
             Entry thisEntr = null;
             try {
                 thisEntr = Entry.deserEntry(Database.decrypt(key, vector, thisStr.getBytes()));
-            } catch (LoginException e) {
+            } catch (WrongPasswordException e) {
                 e.printStackTrace();
             }
             assert thisEntr != null;
             if(thisEntr.name.equals(entryName))
             {
-                System.out.println(thisEntr);
+                return thisEntr;
             }
+
 
         }
 
 
-
-
+        return null;
     }
-    public void readAll()
+    public ArrayList<Entry> readAll()
     {
 
         String allEncryptedEntries = "";
@@ -334,23 +329,26 @@ public class Database {
 
         StringTokenizer st = new StringTokenizer(allEncryptedEntries,"\n");
         int total = 0;
-        System.out.println("Name,Login,Password");
+        //System.out.println("Name,Login,Password");
+        ArrayList<Entry> Entries = new ArrayList<>();
         while(st.hasMoreTokens()) {
             String thisStr = st.nextToken();
             //System.out.println(thisStr);
             Entry thisEntr = null;
             try {
                 thisEntr = Entry.deserEntry(Database.decrypt(key, vector, thisStr.getBytes()));
-            } catch (LoginException e) {
+            } catch (WrongPasswordException e) {
                 e.printStackTrace();
             }
             assert thisEntr != null;
             total++;
-            System.out.println(thisEntr);
+            //System.out.println(thisEntr);
+            Entries.add(thisEntr);
 
         }
 
-        System.out.println("Total entries:" + total);
+        //System.out.println("Total entries:" + total);
+        return Entries;
     }
 
     private static String encrypt(String key, byte[] initVector, String value) {
@@ -414,7 +412,7 @@ public class Database {
         return "";
     }
 
-    private static byte[] decrypt(String key, byte[] initVector, byte[] encrypted) throws LoginException {
+    private static byte[] decrypt(String key, byte[] initVector, byte[] encrypted) throws WrongPasswordException {
         try {
             if(encrypted == null)
                 throw new NullPointerException("Data can not be null");
@@ -427,7 +425,7 @@ public class Database {
             return cipher.doFinal(Base64.decodeBase64(encrypted));
 
         }catch (BadPaddingException e) {
-            LoginException le = new LoginException("Invalid password");
+            WrongPasswordException le = new WrongPasswordException("Invalid password");
             le.initCause(e);
             throw le;
         }

@@ -1,12 +1,7 @@
-package App;
+package Core;
 
+import GUI.GUI;
 import org.apache.commons.cli.*;
-
-import javax.security.auth.login.LoginException;
-import java.io.File;
-import java.io.Console;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import static java.lang.System.exit;
 
@@ -25,7 +20,6 @@ public class App {
         options.addOption(addDatabase);
 
         Option databasepath = new Option("d", "database", true, "Database to open");
-        databasepath.setRequired(true);
         options.addOption(databasepath);
 
         Option databasePassword = new Option("p", "password", true, "Password to database");
@@ -44,6 +38,10 @@ public class App {
         getAllEntry.setRequired(false);
         options.addOption(getAllEntry);
 
+        Option gui = new Option("GUI", false, "Start programm with GUI");
+        getAllEntry.setRequired(false);
+        options.addOption(gui);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
@@ -58,6 +56,12 @@ public class App {
             return;
         }
 
+        if (cmd.hasOption("GUI")){
+
+            GUI appgui = new GUI();
+            appgui.setVisible(true);
+        }
+        /*
         //cheks login password
 
 
@@ -146,6 +150,6 @@ public class App {
 //        System.out.println("Password =" + password);
 
 
-
+    */
     }
 }

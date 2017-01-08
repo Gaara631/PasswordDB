@@ -1,4 +1,4 @@
-package App;
+package Core;
 
 import java.io.*;
 
@@ -9,11 +9,15 @@ public class Entry implements Serializable{
     String name;
     String login;
     String password;
+    String description;
+    String group;
 
-    public Entry(String name, String login, String password) {
+    public Entry(String name, String login, String password, String description, String group) {
         this.name = name;
         this.login = login;
         this.password = password;
+        this.group = group;
+        this.description = description;
     }
 
     public byte[] serEntry()
@@ -45,6 +49,24 @@ public class Entry implements Serializable{
 
     @Override
     public String toString() {
-        return String.format("%s,%s,%s", name,login,password);
+        return String.format("%s,%s,%s,%s", name,login,password,group);
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public String getDescription() {return description;}
 }
